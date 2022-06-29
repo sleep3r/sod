@@ -134,7 +134,8 @@ class GlobalAvgPool(nn.Module):
 
 class UnionAttentionModule(nn.Module):
     def __init__(self, n_channels, gamma=0.1, only_channel_tracing=False):
-        super(UnionAttentionModule, self).__init__()
+        super().__init__()
+
         self.GAP = GlobalAvgPool()
         self.confidence_ratio = gamma
         self.bn = nn.BatchNorm2d(n_channels)
@@ -245,7 +246,7 @@ class aggregation(nn.Module):
 
 
 class ObjectAttention(nn.Module):
-    def __init__(self, channel, kernel_size, denoise=0.93):
+    def __init__(self, channel, kernel_size, denoise=0.98):
         super().__init__()
 
         self.channel = channel

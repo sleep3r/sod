@@ -29,13 +29,14 @@ def app():
     st.sidebar.table(model_info)
 
     cfg = get_config(int(arch))
-
-    model = load_model(cfg, device="cpu")
     transform = get_test_augmentation(cfg.img_size)
 
     uploaded_file = st.file_uploader("Choose a file")
 
     if uploaded_file is not None:
+        with st.spinner('Loading model...'):
+            model = load_model(cfg, device="cpu")
+
         img_bytes = uploaded_file.read()
         st.image(img_bytes, caption='Uploaded image')
 
@@ -49,6 +50,22 @@ def app():
             rgba = cv2.cvtColor(img, cv2.COLOR_RGB2RGBA)
             rgba[:, :, 3] = output * 255
             st.image(rgba, caption='Removed background image')
+
+    with st.expander("Based on the current SoTA paper:"):
+        st.markdown(
+            """
+            ### TRACER: Extreme Attention Guided Salient Object Tracing Network
+    
+            This paper was accepted at AAAI 2022 SA poster session. [[pdf]](https://arxiv.org/abs/2112.07380)    
+            
+            [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/tracer-extreme-attention-guided-salient/salient-object-detection-on-duts-te)](https://paperswithcode.com/sota/salient-object-detection-on-duts-te?p=tracer-extreme-attention-guided-salient)  
+            [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/tracer-extreme-attention-guided-salient/salient-object-detection-on-dut-omron)](https://paperswithcode.com/sota/salient-object-detection-on-dut-omron?p=tracer-extreme-attention-guided-salient)  
+            [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/tracer-extreme-attention-guided-salient/salient-object-detection-on-hku-is)](https://paperswithcode.com/sota/salient-object-detection-on-hku-is?p=tracer-extreme-attention-guided-salient)  
+            [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/tracer-extreme-attention-guided-salient/salient-object-detection-on-ecssd)](https://paperswithcode.com/sota/salient-object-detection-on-ecssd?p=tracer-extreme-attention-guided-salient)  
+            [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/tracer-extreme-attention-guided-salient/salient-object-detection-on-pascal-s)](https://paperswithcode.com/sota/salient-object-detection-on-pascal-s?p=tracer-extreme-attention-guided-salient)                 
+            """
+        )
+        st.image("https://github.com/Karel911/TRACER/raw/main/img/Poster.png", caption='Poster')
 
 
 if __name__ == "__main__":

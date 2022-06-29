@@ -4,12 +4,10 @@ from addict import Dict
 def get_config(arch: int):
     cfg = Dict(
         arch=arch,
-        channels=[24, 40, 112, 320],
         RFB_aggregated_channel=[32, 64, 128],
         frequency_radius=16,
         denoise=0.93,
         gamma=0.1,
-        img_size=320,
     )
 
     img_sizes = {
