@@ -24,7 +24,8 @@ def app():
     st.sidebar.title('Model scale selection')
     arch = st.sidebar.selectbox(
         'Choose model architecture',
-        ('0', '1', '2', '3', '4', '5', '6', '7')
+        ('0', '1', '2', '3', '4', '5', '6', '7'),
+        index=5,
     )
     st.sidebar.table(model_info)
 
@@ -46,6 +47,8 @@ def app():
             batch_t = torch.unsqueeze(img_t, 0)
 
             output = predict(img, model, batch_t)
+
+            cv2.imwrite('output.png', output * 255)
 
             rgba = cv2.cvtColor(img, cv2.COLOR_RGB2RGBA)
             rgba[:, :, 3] = output * 255
