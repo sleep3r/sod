@@ -13,3 +13,7 @@ pip install -U -r requirements.txt
 ```shell
 streamlit run app.py
 ```
+
+## Paper:
+  ### TRACER: Extreme Attention Guided Salient Object Tracing Network
+  This paper was accepted at AAAI 2022 SA poster session. [[pdf]](https://arxiv.org/abs/2112.07380)    
