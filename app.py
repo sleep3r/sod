@@ -48,8 +48,6 @@ def app():
 
             output = predict(img, model, batch_t)
 
-            cv2.imwrite('output.png', output * 255)
-
             rgba = cv2.cvtColor(img, cv2.COLOR_RGB2RGBA)
             rgba[:, :, 3] = output * 255
             st.image(rgba, caption='Removed background image')
