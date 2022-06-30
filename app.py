@@ -36,7 +36,7 @@ def app():
 
     if uploaded_file is not None:
         with st.spinner('Loading model...'):
-            model = load_model(cfg, device="cpu")
+            model = load_model(cfg, device="cuda:0")
 
         img_bytes = uploaded_file.read()
         st.image(img_bytes, caption='Uploaded image')
