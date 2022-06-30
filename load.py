@@ -25,7 +25,7 @@ def load_model(cfg, device):
     path = load_pretrained(f'TE-{cfg.arch}')
 
     model = TRACER(cfg).to(device)
-    model = nn.DataParallel(model, device_ids=[0]).to(device)
+    model = nn.DataParallel(model).to(device)
 
     model.load_state_dict(path)
     _ = model.eval()
