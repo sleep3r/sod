@@ -17,7 +17,7 @@ url_TRACER = {
 
 
 def load_pretrained(model_name):
-    state_dict = model_zoo.load_url(url_TRACER[model_name], map_location=torch.device('cuda:0'))
+    state_dict = model_zoo.load_url(url_TRACER[model_name], map_location=torch.device('cpu'))
     return state_dict
 
 
