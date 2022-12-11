@@ -1,0 +1,4 @@
+notebooks*
+.git*
+.rsyncexclude
+venv*

@@ -1,13 +1,16 @@
-import torch
 import numpy as np
+
+# ML
+import torch
+from torch.fft import fft2, fftshift, ifft2, ifftshift  # noqa
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.fft import fft2, fftshift, ifft2, ifftshift  # noqa
 
-from cnn import DWSConv, DWConv, BasicConv2d
+# SOD
+from cnn import BasicConv2d, DWConv, DWSConv
 
 
-class Frequency_Edge_Module(nn.Module):
+class FrequencyEdgeModule(nn.Module):
     def __init__(self, radius, channel):
         super().__init__()
 
@@ -15,7 +18,9 @@ class Frequency_Edge_Module(nn.Module):
         self.UAM = UnionAttentionModule(channel, only_channel_tracing=True)
 
         # DWS + DWConv
-        self.DWSConv = DWSConv(channel, channel, kernel=3, padding=1, kernels_per_layer=1)
+        self.DWSConv = DWSConv(
+            channel, channel, kernel=3, padding=1, kernels_per_layer=1
+        )
         self.DWConv1 = nn.Sequential(
             DWConv(channel, channel, kernel=1, padding=0, dilation=1),
             BasicConv2d(channel, channel // 4, 1),
@@ -34,8 +39,8 @@ class Frequency_Edge_Module(nn.Module):
         )
         self.conv = BasicConv2d(channel, 1, 1)
 
-    def distance(self, i, j, imageSize, r):
-        dis = np.sqrt((i - imageSize / 2) ** 2 + (j - imageSize / 2) ** 2)
+    def distance(self, i, j, image_size, r):
+        dis = np.sqrt((i - image_size / 2) ** 2 + (j - image_size / 2) ** 2)
         if dis < r:
             return 1.0
         else:
@@ -46,7 +51,7 @@ class Frequency_Edge_Module(nn.Module):
         mask = torch.zeros((rows, cols), dtype=torch.float32)
         for i in range(rows):
             for j in range(cols):
-                mask[i, j] = self.distance(i, j, imageSize=rows, r=r)
+                mask[i, j] = self.distance(i, j, image_size=rows, r=r)
         return mask
 
     def forward(self, x):
@@ -70,8 +75,18 @@ class Frequency_Edge_Module(nn.Module):
         edge_maks = self.DWSConv(x_H)
         skip = edge_maks.clone()
 
-        edge_maks = torch.cat([self.DWConv1(edge_maks), self.DWConv2(edge_maks),
-                               self.DWConv3(edge_maks), self.DWConv4(edge_maks)], dim=1) + skip
+        edge_maks = (
+            torch.cat(
+                [
+                    self.DWConv1(edge_maks),
+                    self.DWConv2(edge_maks),
+                    self.DWConv3(edge_maks),
+                    self.DWConv4(edge_maks),
+                ],
+                dim=1,
+            )
+            + skip
+        )
         edge = torch.relu(self.conv(edge_maks))
 
         x = x + edge  # Feature + Masked Edge information
@@ -79,9 +94,9 @@ class Frequency_Edge_Module(nn.Module):
         return x, edge
 
 
-class RFB_Block(nn.Module):
+class RFBBlock(nn.Module):
     def __init__(self, in_channel, out_channel):
-        super(RFB_Block, self).__init__()
+        super().__init__()
         self.relu = nn.ReLU(True)
         self.branch0 = nn.Sequential(
             BasicConv2d(in_channel, out_channel, 1),
@@ -90,19 +105,19 @@ class RFB_Block(nn.Module):
             BasicConv2d(in_channel, out_channel, 1),
             BasicConv2d(out_channel, out_channel, kernel_size=(1, 3), padding=(0, 1)),
             BasicConv2d(out_channel, out_channel, kernel_size=(3, 1), padding=(1, 0)),
-            BasicConv2d(out_channel, out_channel, 3, padding=3, dilation=3)
+            BasicConv2d(out_channel, out_channel, 3, padding=3, dilation=3),
         )
         self.branch2 = nn.Sequential(
             BasicConv2d(in_channel, out_channel, 1),
             BasicConv2d(out_channel, out_channel, kernel_size=(1, 5), padding=(0, 2)),
             BasicConv2d(out_channel, out_channel, kernel_size=(5, 1), padding=(2, 0)),
-            BasicConv2d(out_channel, out_channel, 3, padding=5, dilation=5)
+            BasicConv2d(out_channel, out_channel, 3, padding=5, dilation=5),
         )
         self.branch3 = nn.Sequential(
             BasicConv2d(in_channel, out_channel, 1),
             BasicConv2d(out_channel, out_channel, kernel_size=(1, 7), padding=(0, 3)),
             BasicConv2d(out_channel, out_channel, kernel_size=(7, 1), padding=(3, 0)),
-            BasicConv2d(out_channel, out_channel, 3, padding=7, dilation=7)
+            BasicConv2d(out_channel, out_channel, 3, padding=7, dilation=7),
         )
         self.conv_cat = BasicConv2d(4 * out_channel, out_channel, 3, padding=1)
         self.conv_res = BasicConv2d(in_channel, out_channel, 1)
@@ -129,7 +144,11 @@ class GlobalAvgPool(nn.Module):
             in_size = x.size()
             return x.view((in_size[0], in_size[1], -1)).mean(dim=2)
         else:
-            return x.view(x.size(0), x.size(1), -1).mean(-1).view(x.size(0), x.size(1), 1, 1)
+            return (
+                x.view(x.size(0), x.size(1), -1)
+                .mean(-1)
+                .view(x.size(0), x.size(1), 1, 1)
+            )
 
 
 class UnionAttentionModule(nn.Module):
@@ -140,26 +159,67 @@ class UnionAttentionModule(nn.Module):
         self.confidence_ratio = gamma
         self.bn = nn.BatchNorm2d(n_channels)
         self.norm = nn.Sequential(
-            nn.BatchNorm2d(n_channels),
-            nn.Dropout3d(self.confidence_ratio)
+            nn.BatchNorm2d(n_channels), nn.Dropout3d(self.confidence_ratio)
         )
-        self.channel_q = nn.Conv2d(in_channels=n_channels, out_channels=n_channels, kernel_size=1, stride=1,
-                                   padding=0, bias=False)
-        self.channel_k = nn.Conv2d(in_channels=n_channels, out_channels=n_channels, kernel_size=1, stride=1,
-                                   padding=0, bias=False)
-        self.channel_v = nn.Conv2d(in_channels=n_channels, out_channels=n_channels, kernel_size=1, stride=1,
-                                   padding=0, bias=False)
+        self.channel_q = nn.Conv2d(
+            in_channels=n_channels,
+            out_channels=n_channels,
+            kernel_size=1,
+            stride=1,
+            padding=0,
+            bias=False,
+        )
+        self.channel_k = nn.Conv2d(
+            in_channels=n_channels,
+            out_channels=n_channels,
+            kernel_size=1,
+            stride=1,
+            padding=0,
+            bias=False,
+        )
+        self.channel_v = nn.Conv2d(
+            in_channels=n_channels,
+            out_channels=n_channels,
+            kernel_size=1,
+            stride=1,
+            padding=0,
+            bias=False,
+        )
 
-        self.fc = nn.Conv2d(in_channels=n_channels, out_channels=n_channels, kernel_size=1, stride=1,
-                            padding=0, bias=False)
+        self.fc = nn.Conv2d(
+            in_channels=n_channels,
+            out_channels=n_channels,
+            kernel_size=1,
+            stride=1,
+            padding=0,
+            bias=False,
+        )
 
         if only_channel_tracing == False:
-            self.spatial_q = nn.Conv2d(in_channels=n_channels, out_channels=1, kernel_size=1, stride=1,
-                                       padding=0, bias=False)
-            self.spatial_k = nn.Conv2d(in_channels=n_channels, out_channels=1, kernel_size=1, stride=1,
-                                       padding=0, bias=False)
-            self.spatial_v = nn.Conv2d(in_channels=n_channels, out_channels=1, kernel_size=1, stride=1,
-                                       padding=0, bias=False)
+            self.spatial_q = nn.Conv2d(
+                in_channels=n_channels,
+                out_channels=1,
+                kernel_size=1,
+                stride=1,
+                padding=0,
+                bias=False,
+            )
+            self.spatial_k = nn.Conv2d(
+                in_channels=n_channels,
+                out_channels=1,
+                kernel_size=1,
+                stride=1,
+                padding=0,
+                bias=False,
+            )
+            self.spatial_v = nn.Conv2d(
+                in_channels=n_channels,
+                out_channels=1,
+                kernel_size=1,
+                stride=1,
+                padding=0,
+                bias=False,
+            )
         self.sigmoid = nn.Sigmoid()
 
     def masking(self, x, mask):
@@ -172,7 +232,7 @@ class UnionAttentionModule(nn.Module):
 
         return masked_x
 
-    def Channel_Tracer(self, x):
+    def ChannelTracer(self, x):
         avg_pool = self.GAP(x)
         x_norm = self.norm(avg_pool)
 
@@ -191,11 +251,10 @@ class UnionAttentionModule(nn.Module):
 
         output = (x * att) + x
         alpha_mask = att.clone()
-
         return output, alpha_mask
 
     def forward(self, x):
-        X_c, alpha_mask = self.Channel_Tracer(x)
+        X_c, alpha_mask = self.ChannelTracer(x)
         X_c = self.bn(X_c)
         x_drop = self.masking(X_c, alpha_mask)
 
@@ -211,29 +270,40 @@ class UnionAttentionModule(nn.Module):
         return output
 
 
-class aggregation(nn.Module):
+class Aggregation(nn.Module):
     def __init__(self, channel):
-        super(aggregation, self).__init__()
+        super().__init__()
         self.relu = nn.ReLU(True)
 
-        self.upsample = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
+        self.upsample = nn.Upsample(scale_factor=2, mode="bilinear", align_corners=True)
         self.conv_upsample1 = BasicConv2d(channel[2], channel[1], 3, padding=1)
         self.conv_upsample2 = BasicConv2d(channel[2], channel[0], 3, padding=1)
         self.conv_upsample3 = BasicConv2d(channel[1], channel[0], 3, padding=1)
         self.conv_upsample4 = BasicConv2d(channel[2], channel[2], 3, padding=1)
-        self.conv_upsample5 = BasicConv2d(channel[2] + channel[1], channel[2] + channel[1], 3, padding=1)
+        self.conv_upsample5 = BasicConv2d(
+            channel[2] + channel[1], channel[2] + channel[1], 3, padding=1
+        )
 
-        self.conv_concat2 = BasicConv2d((channel[2] + channel[1]), (channel[2] + channel[1]), 3, padding=1)
-        self.conv_concat3 = BasicConv2d((channel[0] + channel[1] + channel[2]),
-                                        (channel[0] + channel[1] + channel[2]), 3, padding=1)
+        self.conv_concat2 = BasicConv2d(
+            (channel[2] + channel[1]), (channel[2] + channel[1]), 3, padding=1
+        )
+        self.conv_concat3 = BasicConv2d(
+            (channel[0] + channel[1] + channel[2]),
+            (channel[0] + channel[1] + channel[2]),
+            3,
+            padding=1,
+        )
 
         self.UAM = UnionAttentionModule(channel[0] + channel[1] + channel[2])
 
     def forward(self, e4, e3, e2):
         e4_1 = e4
         e3_1 = self.conv_upsample1(self.upsample(e4)) * e3
-        e2_1 = self.conv_upsample2(self.upsample(self.upsample(e4))) \
-               * self.conv_upsample3(self.upsample(e3)) * e2
+        e2_1 = (
+            self.conv_upsample2(self.upsample(self.upsample(e4)))
+            * self.conv_upsample3(self.upsample(e3))
+            * e2
+        )
 
         e3_2 = torch.cat((e3_1, self.conv_upsample4(self.upsample(e4_1))), 1)
         e3_2 = self.conv_concat2(e3_2)
@@ -252,7 +322,9 @@ class ObjectAttention(nn.Module):
         self.channel = channel
         self.denoise = denoise
 
-        self.DWSConv = DWSConv(channel, channel // 2, kernel=kernel_size, padding=1, kernels_per_layer=1)
+        self.DWSConv = DWSConv(
+            channel, channel // 2, kernel=kernel_size, padding=1, kernels_per_layer=1
+        )
         self.DWConv1 = nn.Sequential(
             DWConv(channel // 2, channel // 2, kernel=1, padding=0, dilation=1),
             BasicConv2d(channel // 2, channel // 8, 1),
@@ -289,6 +361,12 @@ class ObjectAttention(nn.Module):
 
         x = self.DWSConv(x)
         skip = x.clone()
-        x = torch.cat([self.DWConv1(x), self.DWConv2(x), self.DWConv3(x), self.DWConv4(x)], dim=1) + skip
+        x = (
+            torch.cat(
+                [self.DWConv1(x), self.DWConv2(x), self.DWConv3(x), self.DWConv4(x)],
+                dim=1,
+            )
+            + skip
+        )
         x = torch.relu(self.conv1(x))
         return x + decoder_map
