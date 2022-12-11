@@ -19,8 +19,8 @@ make build
 ```
 
 ## Run:
-
 ```shell
+# Runs on localhost:PORT
 PORT=8501 make run
 ```
 
