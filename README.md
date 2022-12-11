@@ -4,16 +4,16 @@
 
 **Salient object detection app**
 
-[![Telegram](https://img.shields.io/badge/author-telegram-blue)](https://t.me/sleep3r)
-
 [![python](https://img.shields.io/badge/python_3.10-passing-success)](https://github.com/sleep3r/garrus/badge.svg?branch=main&event=push)
 
 </div>
 
-## Install:
+----
+
+## Install and local run:
 
 ```shell
-pip install -U -r requirements.txt
+make install && make local_run
 ```
 
 ## Run:
