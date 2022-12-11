@@ -10,18 +10,25 @@
 
 ----
 
+## Build:
+
+```shell
+make build
+```
+
+## Run:
+
+```shell
+PORT=8501 make run
+```
+
 ## Install and local run:
 
 ```shell
 make install && make local_run
 ```
 
-## Run:
-
-```shell
-streamlit run app.py
-```
-
-## Paper:
-  ### TRACER: Extreme Attention Guided Salient Object Tracing Network
-  This paper was accepted at AAAI 2022 SA poster session. [[pdf]](https://arxiv.org/abs/2112.07380)    
+## References:
+|Papers|
+|---|
+| [[1]](https://arxiv.org/abs/2112.07380) Lee, Min Seok, WooSeok Shin, and Sung Won Han. "TRACER: Extreme Attention Guided Salient Object Tracing Network (Student Abstract)." Proceedings of the AAAI Conference on Artificial Intelligence. Vol. 36. No. 11. 2022. | 
