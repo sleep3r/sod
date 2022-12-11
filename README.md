@@ -4,6 +4,7 @@
 
 <b>Salient object detection app</b>
 
+[![CodeFactor](https://www.codefactor.io/repository/github/sleep3r/sod/badge)](https://www.codefactor.io/repository/github/sleep3r/sod)
 [![python](https://img.shields.io/badge/python_3.10-passing-success)](https://github.com/sleep3r/garrus/badge.svg?branch=main&event=push)
 
 This background removal app allows users to quickly and easily remove the background from their images, leaving only the main subject visible.
