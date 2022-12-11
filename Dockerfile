@@ -2,8 +2,7 @@ FROM python:3.10
 
 WORKDIR /app
 
-RUN apt-get update
-RUN apt-get install ffmpeg libsm6 libxext6 -y --no-install-recommends \
+RUN apt-get update && apt-get install ffmpeg libsm6 libxext6 -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
