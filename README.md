@@ -1,7 +1,13 @@
-# State-of-the-Art background removal Streamlit app
-
 <div align="center">
-  <img width="700" src="https://i.ibb.co/Y0Hs2fp/2022-06-29-18-46-35.png">
+
+[![Garrus logo](https://i.ibb.co/Y0Hs2fp/2022-06-29-18-46-35.png)](https://github.com/sleep3r/sod)
+
+**Salient object detection app**
+
+[![Telegram](https://img.shields.io/badge/author-telegram-blue)](https://t.me/sleep3r)
+
+[![python](https://img.shields.io/badge/python_3.10-passing-success)](https://github.com/sleep3r/garrus/badge.svg?branch=main&event=push)
+
 </div>
 
 ## Install:
