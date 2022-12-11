@@ -71,7 +71,7 @@ class FrequencyEdgeModule(nn.Module):
         x_fft = ifft2(x_fft, dim=(-2, -1))
         x_H = torch.abs(x_fft)
 
-        x_H, _ = self.UAM.Channel_Tracer(x_H)
+        x_H, _ = self.UAM.ChannelTracer(x_H)
         edge_maks = self.DWSConv(x_H)
         skip = edge_maks.clone()
 
