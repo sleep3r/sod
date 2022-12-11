@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://i.ibb.co/Y0Hs2fp/2022-06-29-18-46-35.png" width=700 height=520>
+<img src="https://i.ibb.co/Y0Hs2fp/2022-06-29-18-46-35.png" style="height: auto; width: 55%;">
 
 <b>Salient object detection app</b>
 
