@@ -1,7 +1,8 @@
-torch==1.13.0
-torchvision==0.14.0
-streamlit==1.10.0
+torch
+torchvision
+streamlit
 addict==2.3.0
 opencv-python==4.5.5.62
 opencv-python-headless==4.5.5.62
-albumentations==1.1.0
+albumentations
+numpy<2.0
