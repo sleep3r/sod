@@ -2,7 +2,7 @@ torch
 torchvision
 streamlit
 addict==2.3.0
-opencv-python==4.5.5.62
-opencv-python-headless==4.5.5.62
+opencv-python
+opencv-python-headless
 albumentations
 numpy<2.0
