@@ -19,9 +19,7 @@ def predict(img, model, batch_t):
 
     h, w = img.shape[:2]
     output = (
-        F.interpolate(outputs[0].unsqueeze(0), size=(h, w), mode="bilinear")[0][0]
-        .cpu()
-        .numpy()
+        F.interpolate(outputs[0].unsqueeze(0), size=(h, w), mode="bilinear")[0][0].cpu().numpy()
     )
     return output
 
@@ -46,7 +44,6 @@ def app():
             model = load_model(cfg, device="cpu")
 
         img_bytes = uploaded_file.read()
-        st.image(img_bytes, caption="Uploaded image")
 
         with st.spinner("Predicting..."):
             img = imread(img_bytes)
@@ -57,7 +54,10 @@ def app():
 
             rgba = cv2.cvtColor(img, cv2.COLOR_RGB2RGBA)
             rgba[:, :, 3] = output * 255
-            st.image(rgba, caption="Removed background image")
+
+        col1, col2 = st.columns(2)
+        col1.image(img_bytes, caption="Оригинал")
+        col2.image(rgba, caption="Без фона")
 
     with st.expander("Based on the current SoTA paper:"):
         st.markdown(
